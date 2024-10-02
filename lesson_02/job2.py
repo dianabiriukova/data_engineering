@@ -23,30 +23,15 @@ def convert_to_avro():
         shutil.rmtree(stg_dir)
     os.makedirs(stg_dir)
 
-    # Schema for Avro
-    schema = {
-        "doc": "Sales data",
-        "name": "Sales",
-        "namespace": "example.avro",
-        "type": "record",
-        "fields": [
-            {"name": "id", "type": "string"},
-            {"name": "product", "type": "string"},
-            {"name": "price", "type": "float"},
-            {"name": "quantity", "type": "int"},
-            {"name": "date", "type": "string"},
-        ]
-    }
+    sales_data = read_json_files(raw_dir)
 
-    # Processing all files in raw_dir
-    for filename in os.listdir(raw_dir):
-        if filename.endswith(".json"):
-            with open(os.path.join(raw_dir, filename), "r") as f:
-                sales_data = json.load(f)
+    avro_schema_path = os.path.join(os.path.dirname(__file__), "avro_schema.json")
+    with open(avro_schema_path, 'r') as schema_file:
+        schema = json.load(schema_file)
 
-            avro_file = os.path.join(stg_dir, f"{filename.replace('.json', '')}.avro")
-            with open(avro_file, "wb") as out:
-                writer(out, parse_schema(schema), sales_data)
+    avro_file_path = os.path.join(stg_dir, f"sales_{os.path.basename(raw_dir)}.avro")
+
+    write_to_avro(sales_data, avro_file_path, schema)
 
     return jsonify({"status": "success", "stg_dir": stg_dir}), 201
 

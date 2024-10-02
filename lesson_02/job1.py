@@ -4,6 +4,7 @@ import requests
 from flask import Flask, request, jsonify
 from dotenv import load_dotenv
 import shutil
+from utils import fetch_sales_data, save_to_json
 
 load_dotenv()
 AUTH_TOKEN = os.getenv("AUTH_TOKEN")
@@ -30,26 +31,20 @@ def extract_sales_data():
     page = 1
     all_sales = []
     while True:
-        response = requests.get(
-            url='https://fake-api-vycpfa6oca-uc.a.run.app/sales',
-            params={'date': date, 'page': page},
-            headers={'Authorization': AUTH_TOKEN},
-        )
-
-        if response.status_code != 200:
-            break
-
-        sales_data = response.json()
+        sales_data = fetch_sales_data(date, page, auth_token)
+        
+        # Якщо дані відсутні — виходимо з циклу
         if not sales_data:
             break
 
-        all_sales.extend(sales_data)
+        # Формування шляху до файлу
+        file_path = os.path.join(raw_dir, f"sales_{date}_{page}.json")
+
+        # Використання функції save_to_json для запису даних у файл
+        save_to_json(sales_data, file_path)
+
         page += 1
 
-    # Save data in JSON-file
-    output_file = os.path.join(raw_dir, f"sales_{date}.json")
-    with open(output_file, "w") as f:
-        json.dump(all_sales, f, indent=4)
 
     return jsonify({"status": "success", "output_file": output_file}), 201
 
