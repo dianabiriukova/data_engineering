@@ -1,0 +1,13 @@
+{
+  "doc": "Sales data",
+  "name": "Sales",
+  "namespace": "example.avro",
+  "type": "record",
+  "fields": [
+    { "name": "id", "type": "string" },
+    { "name": "product", "type": "string" },
+    { "name": "price", "type": "float" },
+    { "name": "quantity", "type": "int" },
+    { "name": "date", "type": "string" }
+  ]
+}
